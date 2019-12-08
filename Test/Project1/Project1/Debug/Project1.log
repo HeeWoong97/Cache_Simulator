@@ -1,2 +1,5 @@
 ﻿  소스.c
-  Project1.vcxproj -> C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Test\Project1\Debug\Project1.exe
+C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project1\Project1\소스.c(10): warning C4101: '_m' :참조되지 않은 지역 변수입니다.
+C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project1\Project1\소스.c(10): warning C4101: '_n' :참조되지 않은 지역 변수입니다.
+C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project1\Project1\소스.c(10): warning C4101: '_s' :참조되지 않은 지역 변수입니다.
+  Project1.vcxproj -> C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project1\Debug\Project1.exe

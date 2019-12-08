@@ -9,21 +9,21 @@ int main(void) {
 	int n, s, m;
 	int _n, _s, _m;
 	int memAddr[32];
-	unsigned int addr;
+	int addr;
 	int* blockAddr, * wordAddr;
 	int byteOffset[2] = { 0, };
 	int* tag, * setIndex, * wordOffset;
 	int setIndex_D;
 
 	printf("Enter # of cache blocks(2^n blocks): ");
-	scanf("%d", &n);
-	//n = (int)pow(2, _n);
+	scanf("%d", &_n);
+	n = (int)pow(2, _n);
 	printf("Enter # of sets in the cache(2^s sets): ");
-	scanf("%d", &s);
-	//s = (int)pow(2, _s);
+	scanf("%d", &_s);
+	s = (int)pow(2, _s);
 	printf("Enter block size(2^m words): ");
-	scanf("%d", &m);
-	//m = (int)pow(2, _m);
+	scanf("%d", &_m);
+	m = (int)pow(2, _m);
 	printf("Enter 32-bit Memory Address: ");
 	scanf("%x", &addr);
 
@@ -55,7 +55,7 @@ int main(void) {
 
 	setIndex_D = binaryToDemical(setIndex, sizeof(setIndex));
 
-	printf("\n%d-way set associative cache...\n", n - s);
+	printf("\n%d-way set associative cache...\n", _n - _s);
 
 	printf("\nConverted 2-bit Memory Address: ");
 	for (int i = 0; i < 32; i++)
