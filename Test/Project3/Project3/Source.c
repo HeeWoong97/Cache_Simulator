@@ -4,6 +4,8 @@
 #include <math.h>
 #pragma warning(disable: 4996)
 
+#define MAX_ARRAY_SIZE	2048
+
 typedef int bool;
 	#define FALSE	0	
 	#define TRUE	1
@@ -23,8 +25,8 @@ typedef struct { //블록 구조체
 }Block;
 
 int n = 0, s = 0, m = 0;
+char* fileName = NULL;
 const char* HIT_MISS[] = { "miss", "hit" };
-
 
 void setup(int argc, char* arg[]) {
 	for (int index = 1; index < argc; index++) {
@@ -41,11 +43,14 @@ void setup(int argc, char* arg[]) {
 			n = index + 1 < argc ? atoi(arg[index + 1]) : fprintf(stderr, "Wrong Syntax!\n");
 			break;
 		}
+		int len = strlen(arg[index - 1]);
+		fileName = (char*)malloc(sizeof(char) * len);
+		strcpy(fileName, arg[index - 1]);
 	}
 }
 
 int main(int argc, char* args[]) {
-	Address address[10];
+	Address address[MAX_ARRAY_SIZE];
 	
 	int setindex_bit, wordoffset_bit;
 	int way = 0;
@@ -59,35 +64,21 @@ int main(int argc, char* args[]) {
 		if (c == '\n')ARRAY_SIZE++;
 	setup(argc, args);
 
-	if (ARRAY_SIZE > 1024) {
+	if (ARRAY_SIZE > MAX_ARRAY_SIZE) {
 		fprintf(stderr, "ERROR: Array Size overflow\n");
 		return -1;
 	} 
-	else
-		printf("#of addr: %d\n", ARRAY_SIZE);
-	//scanf("%d %d %d", &n, &s, &m);
-	printf("#of blocks in a set: %d\n", n);
-	printf("#of sets in a cache: %d\n", s);
-	printf("#of words in a block: %d\n", m);
-	printf("\n");
 
 	setindex_bit = log2(s);
 	wordoffset_bit = log2(m);
 
-	printf("\n");
-	printf("Set index: %d bits, ", setindex_bit);
-	printf("Word offset: %d bits", wordoffset_bit);
-	printf("\n");
-
 	fseek(fp, 0, SEEK_SET);
 
-	printf("Enter 32-bit address\n");
 	for (int i = 0; i < ARRAY_SIZE; i++) {
 		fscanf(fp, "%x", &address[i].addr);
 	}
 
 	way = n;
-	printf("\n%d-way set associative...\n", way);
 
 	Block * *cache;
 
@@ -117,12 +108,12 @@ int main(int argc, char* args[]) {
 		address[i].result = 0;
 	}
 
-	printf("\n");
 	for (int i = 0; i < ARRAY_SIZE; i++) {
-		printf("Set index of %x: %d\n", address[i].addr, address[i].Index);
-	}
-
-	for (int i = 0; i < ARRAY_SIZE; i++) {
+		if (i == 0) {
+			fprintf(fp2, "0x%08X\tmiss\n", address[i].addr);
+			miss += 1;
+			continue;
+		}
 		bool isHit;
 		for (int j = 0; j < s; j++) { //블럭 LRU 업데이트
 			for (int k = 0; k < way; k++) {
@@ -132,9 +123,8 @@ int main(int argc, char* args[]) {
 		}
 
 		for (int j = 0; j < way; j++) {
-			if (address[i].addr == cache[address[i].Index][j].addr) { //해당 set에서 같은 주소를 찾았으면
-				fprintf(fp2, "0x%08X\thit\n", address[i].addr);
-				//isHit = TRUE;
+			if (address[i].addr == cache[address[i].Index][j].addr) { //해당 set에서 같은 태그를 찾았으면
+				isHit = TRUE;
 				hit += 1; //hit!
 				cache[address[i].Index][j].LRU += 1; //그 블럭의 LRU 증가
 				address[i].result = 1;
@@ -142,8 +132,7 @@ int main(int argc, char* args[]) {
 			}
 		}
 		if (address[i].result == 0) { //위의 반복문에서 hit이 일어나지 않았다면
-			fprintf(fp2, "0x%08X\tmiss\n", address[i].addr);
-			//isHit = FALSE;
+			isHit = FALSE;
 			miss += 1; //miss!
 			address[i].result = 0;
 			for (int j = 0; j < way; j++) { //비어있는 block이 있는지 확인
@@ -172,7 +161,7 @@ int main(int argc, char* args[]) {
 				}
 			}
 		}
-		//fprintf(fp2, "0x%08X\t%s\n", address[i].addr, HIT_MISS[isHit]);
+		fprintf(fp2, "0x%08X\t%s\n", address[i].addr, HIT_MISS[isHit]);
 	}
 
 	fprintf(fp2, "# of cache hits	%d\n", hit);
