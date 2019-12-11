@@ -7,8 +7,8 @@
 #define logB(x, base) log(x)/log(base)
 
 typedef int bool;
-	#define false 0	
-	#define true 1
+#define false 0	
+#define true 1
 
 typedef struct {
 	unsigned int addr;
@@ -26,7 +26,7 @@ typedef struct { //블록 구조체
 
 int main(void) {
 	Address address[ARRAY_SIZE];
-	int n=0, s=0, m=0;
+	int n = 0, s = 0, m = 0;
 	int setindex_bit, wordoffset_bit;
 	int way = 0;
 	int hit = 0, miss = 0;
@@ -54,9 +54,9 @@ int main(void) {
 	way = n;
 	printf("\n%d-way set associative...\n", way);
 
-	Block** cache;
+	Block * *cache;
 
-	cache = (Block**)malloc(sizeof(Block*) * s); //Block들이 모여서 cache가 된다.
+	cache = (Block * *)malloc(sizeof(Block*) * s); //Block들이 모여서 cache가 된다.
 	for (int i = 0; i < s; i++) {
 		cache[i] = (Block*)malloc(sizeof(Block) * way);
 	}
@@ -135,7 +135,7 @@ int main(void) {
 			}
 		}
 	}
-	
+
 	printf("hit: %d\n", hit);
 	printf("miss: %d\n", miss);
 
