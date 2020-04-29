@@ -10,7 +10,7 @@ typedef int bool;
 	#define FALSE	0	
 	#define TRUE	1
 
-typedef struct {
+typedef struct { //주소 구조체
 	unsigned int addr;
 	unsigned int tag, Index, wordOffset, byteOffset;
 	unsigned int blockAddr, wordAddr;
@@ -19,13 +19,13 @@ typedef struct {
 }Address;
 
 typedef struct { //블록 구조체
-	unsigned int addr; //메모리 주소를 저장하고
+	unsigned int tag; //태그를 저장하고
 	bool isFull; //비어있는지 아닌지 상태
 	int LRU;
 }Block;
 
 int n = 0, s = 0, m = 0;
-char* fileName = NULL;
+char* fileName;
 const char* HIT_MISS[] = { "miss", "hit" };
 
 void setup(int argc, char* arg[]) {
@@ -44,27 +44,28 @@ void setup(int argc, char* arg[]) {
 			break;
 		}
 		int len = strlen(arg[index - 1]);
-		fileName = (char*)malloc(sizeof(char) * len);
+		fileName= (char*)malloc(sizeof(char) * len);
 		strcpy(fileName, arg[index - 1]);
 	}
 }
 
 int main(int argc, char* args[]) {
-	Address address[MAX_ARRAY_SIZE];
+	Address address[MAX_ARRAY_SIZE] = { 0, };
 	
 	int setindex_bit, wordoffset_bit;
 	int way = 0;
 	int hit = 0, miss = 0;
-	int ARRAY_SIZE = 0;
+	int ADDRESS_SIZE = 0;
 
 	FILE* fp = fopen("test.txt", "r");
 	FILE* fp2 = fopen("result.txt", "w");
 	char c;
 	while ((c = fgetc(fp)) != EOF)
-		if (c == '\n')ARRAY_SIZE++;
+		if (c == '\n')
+			ADDRESS_SIZE++;
 	setup(argc, args);
 
-	if (ARRAY_SIZE > MAX_ARRAY_SIZE) {
+	if (ADDRESS_SIZE > MAX_ARRAY_SIZE) {
 		fprintf(stderr, "ERROR: Array Size overflow\n");
 		return -1;
 	} 
@@ -74,15 +75,13 @@ int main(int argc, char* args[]) {
 
 	fseek(fp, 0, SEEK_SET);
 
-	for (int i = 0; i < ARRAY_SIZE; i++) {
+	for (int i = 0; i < ADDRESS_SIZE; i++) {
 		fscanf(fp, "%x", &address[i].addr);
 	}
 
 	way = n;
 
-	Block * *cache;
-
-	cache = (Block * *)malloc(sizeof(Block*) * s); //Block들이 모여서 cache가 된다.
+	Block** cache = (Block **)malloc(sizeof(Block*) * s); //Block들이 모여서 cache가 된다.
 	for (int i = 0; i < s; i++) {
 		cache[i] = (Block*)malloc(sizeof(Block) * way);
 	}
@@ -94,7 +93,7 @@ int main(int argc, char* args[]) {
 		}
 	}
 
-	for (int i = 0; i < ARRAY_SIZE; i++) { //주소 정보 업데이트
+	for (int i = 0; i < ADDRESS_SIZE; i++) { //주소 정보 업데이트
 		address[i].blockAddr = address[i].addr >> (wordoffset_bit + 2);
 		address[i].wordAddr = address[i].addr >> 2;
 
@@ -103,13 +102,13 @@ int main(int argc, char* args[]) {
 		address[i].wordOffset = (address[i].addr & ((1 << (wordoffset_bit + 2)) - 4)) >> 2;
 		address[i].byteOffset = address[i].addr & 0x00000003;
 
-		address[i].setIndex = address[i].blockAddr % s;
+		//address[i].setIndex = address[i].blockAddr % s;
 
 		address[i].result = 0;
 	}
 
-	for (int i = 0; i < ARRAY_SIZE; i++) {
-		if (i == 0) {
+	for (int i = 0; i < ADDRESS_SIZE; i++) {
+		if (i == 0) { //첫번째 주소면 miss
 			fprintf(fp2, "0x%08X\tmiss\n", address[i].addr);
 			miss += 1;
 			continue;
@@ -121,12 +120,11 @@ int main(int argc, char* args[]) {
 					cache[j][k].LRU++;
 			}
 		}
-
-		for (int j = 0; j < way; j++) {
-			if (address[i].addr == cache[address[i].Index][j].addr) { //해당 set에서 같은 태그를 찾았으면
+		for (int k = 0; k < way; k++) {
+			if (address[i].addr == cache[address[i].Index][k].tag) { //해당 set에서 같은 태그를 찾았으면
 				isHit = TRUE;
 				hit += 1; //hit!
-				cache[address[i].Index][j].LRU += 1; //그 블럭의 LRU 증가
+				cache[address[i].Index][k].LRU += 1; //그 블럭의 LRU 증가
 				address[i].result = 1;
 				break; //더 이상 탐색할 필요가 없으므로 반복문 탈출
 			}
@@ -135,28 +133,35 @@ int main(int argc, char* args[]) {
 			isHit = FALSE;
 			miss += 1; //miss!
 			address[i].result = 0;
-			for (int j = 0; j < way; j++) { //비어있는 block이 있는지 확인
-				if (cache[address[i].Index][j].isFull == TRUE) { //block이 이미 채워져 있다면
-					continue; //일단 진행
+			for (int j = 0; j < s; j++) {
+				for (int k = 0; k < way; k++) { //비어있는 block이 있는지 확인
+					if (cache[j][k].isFull == TRUE) { //block이 이미 채워져 있다면
+						continue; //일단 진행
+					}
+					else { //비어있는 블록을 발견하면
+						cache[j][k].tag = address[i].addr; //채워 넣는다.
+						break; //채워 넣었다면 반복문 탈출
+					}
 				}
-				else { //비어있는 블록을 발견하면
-					cache[address[i].Index][j].addr = address[i].addr; //채워 넣는다.
-					break; //채워 넣었다면 반복문 탈출
-				}
-
-				if (j == way - 1) { //반복문을 다 돌았지만 비어있는 block을 찾지 못했다면(반복문을 탈출하지 못했다면)
+				if (j == s - 1) { //반복문을 다 돌았지만 비어있는 block을 찾지 못했다면(반복문을 탈출하지 못했다면)
 					int max_LRU = 0;
-					for (int k = 0; i < way; k++) { //LRU가 큰 블럭 탐색
-						if (cache[address[i].Index][j].LRU > max_LRU)
-							max_LRU = k;
-					}
-					if (max_LRU == 0) { //못찾았다면
-						cache[address[i].Index][0].addr = address[i].addr; //set의 0번째 block에 넣기
-						cache[address[i].Index][0].LRU = 0;
-					}
-					else { //찾았다면
-						cache[address[i].Index][max_LRU].addr = address[i].addr;
-						cache[address[i].Index][max_LRU].LRU = 0;
+					int max_LRU_set = 0, max_LRU_way = 0;
+					for (int k = 0; k < s; k++) {
+						for (int l = 0; l < way; l++) { //LRU가 큰 블럭 탐색
+							if (cache[k][l].LRU > max_LRU) {
+								max_LRU = cache[k][l].LRU;
+								max_LRU_set = k;
+								max_LRU_way = l;
+							}
+						}
+						if (max_LRU == 0) { //못찾았다면
+							cache[0][0].tag = address[i].addr; //set의 0번째 block에 넣기
+							cache[0][0].LRU = 0;
+						}
+						else { //찾았다면
+							cache[max_LRU_set][max_LRU_way].tag = address[i].addr;
+							cache[max_LRU_set][max_LRU_way].LRU = 0;
+						}
 					}
 				}
 			}

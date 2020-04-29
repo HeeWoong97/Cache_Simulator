@@ -1,4 +1,4 @@
 ﻿  Source.c
-C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project3\Project3\Source.c(78): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project3\Project3\Source.c(79): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project3\Project3\Source.c(72): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project3\Project3\Source.c(73): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Project3.vcxproj -> C:\Users\User\Desktop\새 폴더\수업자료\2019-2학년\2학기\컴퓨터구조\과제\Cache_Simulator\Test\Project3\Debug\Project3.exe
